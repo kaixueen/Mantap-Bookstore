@@ -1,0 +1,60 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Auto Scaling Group and Launch Template for Mantap Bookstore (Hardcoded Values)
+
+Resources:
+
+  BookstoreLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: bookstore-template
+      LaunchTemplateData:
+        InstanceType: t3.micro
+        ImageId: ami-020cba7c55df1f615   # Replace with the latest Ubuntu AMI ID
+        KeyName: bookstore
+        IamInstanceProfile:
+          Name: LabInstanceProfile
+        SecurityGroupIds:
+          - sg-09f558d4650adabfb       # Replace with your ec2 security group ID
+        UserData:
+          Fn::Base64: |
+            #!/bin/bash
+            sudo apt update
+            sudo apt install docker.io -y
+            sudo systemctl start docker
+            sudo systemctl enable docker
+            sudo usermod -aG docker ubuntu
+            sudo fallocate -l 1G /swapfile
+            sudo chmod 600 /swapfile
+            sudo mkswap /swapfile
+            sudo swapon /swapfile
+            sudo apt install mysql-client-core-8.0 -y
+            sudo apt install docker-compose -y
+
+  BookstoreASG:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: bookstore-asg
+      VPCZoneIdentifier:
+        - subnet-028186e1cc3bbec58        # Replace with your private subnet a ID
+        - subnet-0f8913708a2adc08f       # Replace with your private subnet b ID
+      LaunchTemplate:
+        LaunchTemplateId: !Ref BookstoreLaunchTemplate
+        Version: !GetAtt BookstoreLaunchTemplate.LatestVersionNumber
+      MinSize: "1"
+      MaxSize: "2"
+      DesiredCapacity: "1"
+      TargetGroupARNs:
+        - arn:aws:elasticloadbalancing:us-east-1:918907052597:targetgroup/bookstore-tg/9ad659db75fad610  # Replace with target group ID
+      Tags:
+        - Key: Name
+          Value: bookstore-asg-instance
+          PropagateAtLaunch: true
+
+Outputs:
+  ASGName:
+    Value: !Ref BookstoreASG
+    Description: Auto Scaling Group Name
+
+  LaunchTemplateID:
+    Value: !Ref BookstoreLaunchTemplate
+    Description: Launch Template ID

@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: RDS MySQL for Mantap Bookstore
+
+Resources:
+  BookstoreDBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Subnet group for bookstore RDS
+      SubnetIds:
+        - subnet-0a9744e399bbeb020 # Replace with actual private subnet ID
+        - subnet-0452feb6183c4581a
+      DBSubnetGroupName: bookstore-db-subnet-group
+
+  BookstoreDB:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: bookstoredb
+      AllocatedStorage: 20
+      DBInstanceClass: db.t3.micro
+      Engine: mysql
+      EngineVersion: 8.0.34
+      MasterUsername: admin
+      MasterUserPassword: Pa$$w0rd123
+      VPCSecurityGroups:
+        - sg-0b68ffeb4f1d72ac0
+      DBSubnetGroupName: !Ref BookstoreDBSubnetGroup
+      PubliclyAccessible: false
+      MultiAZ: false
+      BackupRetentionPeriod: 0
+      StorageType: gp2
+      DeletionProtection: false
+      StorageEncrypted: true
+      KmsKeyId: alias/aws/rds  # Default AWS-managed key for RDS
+      Tags:
+        - Key: Name
+          Value: bookstore-rds
+
+Outputs:
+  BookstoreRDSID:
+    Value: !Ref BookstoreDB

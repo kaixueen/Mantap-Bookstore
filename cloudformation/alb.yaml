@@ -1,0 +1,31 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Application Load Balancer for Django Application
+
+Resources:
+  BookstoreALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: bookstore-alb
+      Scheme: internet-facing
+      Subnets:
+        - subnet-0d3422393cfa4b930         # Replace with your public subnet ID A
+        - subnet-09d0d64161410efd4         # Replace with your public subnet ID B
+      SecurityGroups:
+        - sg-082ff68aa855a515f            # Replace with your ALB security group ID
+      LoadBalancerAttributes:
+        - Key: idle_timeout.timeout_seconds
+          Value: '60'
+      Tags:
+        - Key: Name
+          Value: bookstore-alb
+
+  ALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref BookstoreALB
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn:
+            arn:aws:elasticloadbalancing:us-east-1:918907052597:targetgroup/bookstore-tg/bb8e4fcffd904953 # Replace with your target group ID

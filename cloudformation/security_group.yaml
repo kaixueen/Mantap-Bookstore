@@ -1,0 +1,65 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Security groups for bookstore infrastructure
+
+Resources:
+  BastionSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: bookstore-bastion
+      GroupDescription: Allow SSH from anywhere (for bastion)
+      VpcId: vpc-0168606fabda383c6  # Replace with vpc ID
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: bookstore-alb
+      GroupDescription: Allow HTTP from public
+      VpcId: vpc-0168606fabda383c6  # Replace with vpc ID
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  EC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: bookstore-ec2
+      GroupDescription: Allow SSH and app traffic from bastion and ALB
+      VpcId: vpc-0168606fabda383c6  # Replace with vpc ID
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          SourceSecurityGroupId: !Ref BastionSecurityGroup
+        - IpProtocol: tcp
+          FromPort: 8000
+          ToPort: 8000
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+
+  RDSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: bookstore-rds
+      GroupDescription: Allow MySQL traffic from EC2
+      VpcId: vpc-0168606fabda383c6  # Replace with vpc ID
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !Ref EC2SecurityGroup
+
+Outputs:
+  BastionSG:
+    Value: !Ref BastionSecurityGroup
+  EC2SG:
+    Value: !Ref EC2SecurityGroup
+  ALBSG:
+    Value: !Ref ALBSecurityGroup
+  RDSSG:
+    Value: !Ref RDSSecurityGroup

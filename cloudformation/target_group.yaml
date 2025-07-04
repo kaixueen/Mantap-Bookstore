@@ -1,0 +1,20 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Target group for Django application on EC2
+
+Resources:
+  BookstoreTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: bookstore-tg
+      Protocol: HTTP
+      Port: 8000
+      VpcId: vpc-0168606fabda383c6  # Replace with vpc ID
+      TargetType: instance
+      HealthCheckProtocol: HTTP
+      HealthCheckPath: /
+      HealthCheckPort: traffic-port
+      Matcher:
+        HttpCode: "200,301,302"
+      Tags:
+        - Key: Name
+          Value: bookstore-tg

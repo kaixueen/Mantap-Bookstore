@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFront distribution for S3 static/media files
+
+Resources:
+  BookstoreCloudFrontOAC:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: bookstore-oac
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  BookstoreCloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        DefaultRootObject: index.html
+        PriceClass: PriceClass_100
+        DefaultCacheBehavior:
+          TargetOriginId: bookstore-s3-origin
+          ViewerProtocolPolicy: allow-all
+          AllowedMethods:
+            - GET
+            - HEAD
+          CachedMethods:
+            - GET
+            - HEAD
+          ForwardedValues:
+            QueryString: false
+            Cookies:
+              Forward: none
+        Origins:
+          - Id: bookstore-s3-origin
+            DomainName: bookstorebk.s3.us-east-1.amazonaws.com  
+            S3OriginConfig:
+              OriginAccessIdentity: ""  
+            OriginAccessControlId: !Ref BookstoreCloudFrontOAC
+
+Outputs:
+  BookstoreCloudFrontDomain:
+    Value: !GetAtt BookstoreCloudFrontDistribution.DomainName
