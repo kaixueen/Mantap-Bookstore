@@ -69,17 +69,6 @@ Mantap Bookstore is fully hosted on **Amazon Web Services (AWS)** using Infrastr
 
 ---
 
-## 🖼️ Screenshot Suggestions for Report
-
-- Dashboard view of CloudTrail logs  
-- EC2 instance attached to Auto Scaling Group  
-- CloudWatch metrics for EC2 or RDS  
-- Screenshot of your Django homepage  
-- S3 bucket and CloudFront configuration  
-- RDS DB connection confirmation
-
----
-
 ## 📌 Summary
 
 Mantap Bookstore demonstrates a secure and scalable deployment of a web application using Django and AWS services. It showcases key cloud architecture principles, including isolation, automation, scalability, and monitoring—all integrated using Infrastructure as Code.
